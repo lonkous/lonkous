@@ -2,7 +2,7 @@
 <h3 align="center">A passionate fullstack developement from Switzerland.</h3>
 
 - 🔭 I’m currently working at **Abilium Gmbh** on Custom Odoo Solutions
-- 
+
 <p align="left"> <img src="https://komarev.com/ghpvc/?username=lonkous&label=Profile%20views&color=0e75b6&style=flat" alt="lonkous" /> </p>
 
 <h3 align="left">Languages and Tools:</h3>
