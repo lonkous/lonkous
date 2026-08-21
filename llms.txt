@@ -1,0 +1,15 @@
+Name: Elias Kupeczki
+GitHub: lonkous
+Snapshot date: 2026-08-21 (counts below are point-in-time)
+Role: Fullstack Developer at Abilium GmbH, Switzerland
+Location: Switzerland
+Hireable: yes
+Account created: 2018-10-02
+Followers: 4
+Public repos: 14
+Organisations: Abilium-Odoo, EpicGames
+Recent contributions (rolling year): 1090 total, 1082 restricted/private, 8 public commits
+Repos contributed to: 21
+Primary work: private Odoo/ERP development (Python, XML, JavaScript)
+Public interests: terminal/editor tooling — Neovim (Lua), tmux, kitty, dotfiles; MarkDownEditor, Slideshow
+Tech stack: Python, Odoo, PostgreSQL, JavaScript, TypeScript, Vue, Docker, Linux, Neovim, Lua, Bash, Git, Java, PHP

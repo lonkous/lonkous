@@ -1,0 +1,81 @@
+name: Update profile assets
+
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Generate contribution snake SVGs
+        uses: Platane/snk/svg-only@v3
+        with:
+          github_user_name: ${{ github.repository_owner }}
+          outputs: |
+            dist/github-contribution-grid-snake.svg
+            dist/github-contribution-grid-snake-dark.svg?palette=github-dark
+
+      - name: Generate stats badge data
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          # A repo-scoped GITHUB_TOKEN cannot see private contributions and would
+          # silently report ~8 instead of ~1090, so require the user PAT instead.
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::error::GH_TOKEN secret is required so private contributions are counted."
+            exit 1
+          fi
+
+          mkdir -p dist
+          owner="${{ github.repository_owner }}"
+
+          response=$(gh api graphql -f login="$owner" -f query='
+            query($login: String!) {
+              user(login: $login) {
+                createdAt
+                followers { totalCount }
+                contributionsCollection {
+                  contributionCalendar { totalContributions }
+                }
+                repositoriesContributedTo(
+                  first: 1
+                  contributionTypes: [COMMIT, PULL_REQUEST, REPOSITORY, ISSUE]
+                ) { totalCount }
+              }
+            }
+          ')
+
+          total_contributions=$(echo "$response" | jq '.data.user.contributionsCollection.contributionCalendar.totalContributions')
+          repos_contributed=$(echo "$response" | jq '.data.user.repositoriesContributedTo.totalCount')
+          followers=$(echo "$response" | jq '.data.user.followers.totalCount')
+          created_at=$(echo "$response" | jq -r '.data.user.createdAt')
+
+          years=$(( ( $(date +%s) - $(date -d "$created_at" +%s) ) / 31557600 ))
+
+          write_badge() {
+            jq -n --arg label "$2" --arg message "$3" \
+              '{schemaVersion: 1, label: $label, message: $message, color: "6e40c9", labelColor: "1a1b27"}' \
+              > "dist/$1"
+          }
+
+          write_badge contributions.json "contributions" "$total_contributions"
+          write_badge repos.json "repos contributed to" "$repos_contributed"
+          write_badge followers.json "followers" "$followers"
+          write_badge years.json "years on github" "$years"
+
+      # Both the snake SVGs and the badge JSON must be pushed in one step: this
+      # action force-pushes the branch, so separate pushes would erase each other.
+      - name: Push assets to output branch
+        uses: crazy-max/ghaction-github-pages@v3.1.0
+        with:
+          target_branch: output
+          build_dir: dist
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
